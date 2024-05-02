@@ -1,20 +1,15 @@
 // Node.js
 import React from 'react';
-import { useDrag } from 'react-dnd';
 
-const Node = ({ id, left, top }) => {
-  const [{ isDragging }, drag] = useDrag({
-    item: { id, left, top, type: 'node' },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+export default function Node({ data, id }) {
+  const handleInputChange = (event) => {
+    data.label = event.target.value;
+  };
 
   return (
-    <div ref={drag} style={{ left, top }}>
-      Node {id}
+    <div>
+      <input type="text" defaultValue={data.label} onChange={handleInputChange} />
     </div>
   );
-};
+}
 
-export default Node;

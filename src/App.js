@@ -1,21 +1,66 @@
-import React, { useState } from 'react';
-import Draggable from 'react-draggable';
+import React, { useState, useCallback } from 'react';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const DraggableRectangle = ({ node, onClick }) => (
-  <Draggable>
-    <div onClick={() => onClick(node)} style={{ border: '1px solid black', width: 100, height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <input type="text" defaultValue={node.text} />
-    </div>
-  </Draggable>
-);
+import Node from './Node';
+
+import ReactFlow, {
+  MiniMap,
+  Controls,
+  Background,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+} from 'reactflow';
+ 
+import 'reactflow/dist/style.css';
+ 
+const initialNodes = [
+  { id: '1', type: 'editable', position: { x: 0, y: 0 }, data: { label: '1' } },
+  { id: '2', type: 'editable', position: { x: 0, y: 100 }, data: { label: '2' } },
+];
+const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
 function App() {
-  const [nodes, setNodes] = useState([{ text: "Drag me!" }, { text: "Drag me too!" }]);
+  /*const [nodes, setNodes] = useState([{ text: "Drag me!" }, { text: "Drag me too!" }]);
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [connectors, setConnectors] = useState([]);
+  */
 
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+ 
+  const onConnect = useCallback(
+    (params) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges],
+  );
+
+  const addNode = () => {
+    const newNode = {
+      id: (nodes.length + 1).toString(),
+      type: 'editable',
+      position: { x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight },
+      data: { label: 'New Node' },
+    };
+    setNodes((nodes) => [...nodes, newNode]);
+  };
+
+
+  /*const addConnector = () => {
+    if (nodes.length > 1) {
+      const source = nodes[0].id;
+      const target = nodes[1].id;
+      const newEdge = { id: `${source}-${target}`, source, target };
+      setEdges((edges) => [...edges, newEdge]);
+    }
+  };
+  // create a function to select a node
+  const selectNode = (node) => {
+    console.log(node);
+  };*/
+
+
+/*
   const addNode = () => {
     setNodes([...nodes, { text: "New Node" }]);
   };
@@ -30,7 +75,7 @@ function App() {
       setSelectedNodes([]);
     }
   };
-
+*/
   return (
     <div className="App">
       <Navbar bg="light" expand="lg">
@@ -45,25 +90,24 @@ function App() {
             </NavDropdown>
             <NavDropdown title="Edit" id="basic-nav-dropdown">
               <NavDropdown.Item onClick={addNode}>Add Node</NavDropdown.Item>
-              <NavDropdown.Item onClick={addConnector}>Add Connector</NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
       </Navbar>
-      {nodes.map((node, index) => (
-        <DraggableRectangle key={index} node={node} onClick={selectNode} />
-      ))}
-      <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-        {connectors.map(([from, to], index) => (
-          <line
-            key={index}
-            x1={from.left + 50} y1={from.top + 50}
-            x2={to.left + 50} y2={to.top + 50}
-            stroke="black"
-            style={{ pointerEvents: 'visibleStroke' }}
-          />
-        ))}
-      </svg>
+      <div style={{ width: '100vw', height: '100vh' }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          //nodeTypes={{ editable: Node }} // The node.js type is causing the nodes to appear differntly, without the reactflow ports
+        >
+          <Controls />
+          <MiniMap />
+          <Background variant="dots" gap={12} size={1} />
+        </ReactFlow>
+      </div>
     </div>
   );
 }
