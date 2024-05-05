@@ -2,7 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Node from './Node';
+//import Node from './Node';
+import TextUpdaterNode from './TextUpdaterNode';
+
+import './text-updater-node.css';
 
 import ReactFlow, {
   MiniMap,
@@ -15,11 +18,17 @@ import ReactFlow, {
  
 import 'reactflow/dist/style.css';
  
+const rfStyle = {
+  backgroundColor: '#B8CEFF',
+};
+
 const initialNodes = [
-  { id: '1', type: 'editable', position: { x: 0, y: 0 }, data: { label: '1' } },
-  { id: '2', type: 'editable', position: { x: 0, y: 100 }, data: { label: '2' } },
+  { id: '1', type: 'textUpdater', position: { x: 0, y: 0 }, data: { label: '1' } },
+  { id: '2', type: 'textUpdater', position: { x: 0, y: 100 }, data: { label: '2' } },
 ];
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+
+const nodeTypes = { textUpdater: TextUpdaterNode };
 
 function App() {
   /*const [nodes, setNodes] = useState([{ text: "Drag me!" }, { text: "Drag me too!" }]);
@@ -38,8 +47,8 @@ function App() {
   const addNode = () => {
     const newNode = {
       id: (nodes.length + 1).toString(),
-      type: 'editable',
-      position: { x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight },
+      type: 'textUpdater',
+      position: { x: 0, y: 0 },
       data: { label: 'New Node' },
     };
     setNodes((nodes) => [...nodes, newNode]);
@@ -101,6 +110,9 @@ function App() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+          style={rfStyle}
           //nodeTypes={{ editable: Node }} // The node.js type is causing the nodes to appear differntly, without the reactflow ports
         >
           <Controls />
