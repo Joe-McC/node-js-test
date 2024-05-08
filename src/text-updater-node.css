@@ -1,13 +1,26 @@
 .text-updater-node {
-  height: 50px;
+  height: 80px; /* Reduced from 50px to 30px */
   border: 1px solid #eee;
   padding: 5px;
   border-radius: 5px;
   background: white;
+  display: flex; 
+  align-items: center; 
+  justify-content: left; 
+  flex-direction: column;
 }
 
-.text-updater-node label {
-  display: block;
-  color: #777;
-  font-size: 12px;
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto; /* Creates two columns */
+  gap: 10px; /* Adds a gap between grid items */
+}
+
+.grid-container label {
+  grid-column: 1; /* Places labels in the first column */
+}
+
+.grid-container span,
+.grid-container input {
+  grid-column: 2; /* Places the span and input in the second column */
 }

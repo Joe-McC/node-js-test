@@ -11,7 +11,9 @@ function TextUpdaterNode({ data, isConnectable }) {
   return (
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-      <div>
+      <div className="grid-container">
+        <label>Node ID:</label> 
+        <span>{data.id}</span>
         <label htmlFor="text">Text:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
@@ -22,7 +24,6 @@ function TextUpdaterNode({ data, isConnectable }) {
         style={handleStyle}
         isConnectable={isConnectable}
       />
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
   );
 }
