@@ -20,8 +20,8 @@ function TextUpdaterNode({ data, isConnectable }) {
       <Handle
         type="source"
         position={Position.Bottom}
-        id="a"
-        style={handleStyle}
+        //id="a"
+        //style={handleStyle}
         isConnectable={isConnectable}
       />
     </div>

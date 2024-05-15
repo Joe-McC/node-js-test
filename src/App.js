@@ -31,11 +31,6 @@ const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 const nodeTypes = { textUpdater: TextUpdaterNode };
 
 function App() {
-  /*const [nodes, setNodes] = useState([{ text: "Drag me!" }, { text: "Drag me too!" }]);
-  const [selectedNodes, setSelectedNodes] = useState([]);
-  const [connectors, setConnectors] = useState([]);
-  */
-
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
  
@@ -54,37 +49,6 @@ function App() {
     setNodes((nodes) => [...nodes, newNode]);
   };
 
-
-  /*const addConnector = () => {
-    if (nodes.length > 1) {
-      const source = nodes[0].id;
-      const target = nodes[1].id;
-      const newEdge = { id: `${source}-${target}`, source, target };
-      setEdges((edges) => [...edges, newEdge]);
-    }
-  };
-  // create a function to select a node
-  const selectNode = (node) => {
-    console.log(node);
-  };*/
-
-
-/*
-  const addNode = () => {
-    setNodes([...nodes, { text: "New Node" }]);
-  };
-
-  const selectNode = (node) => {
-    setSelectedNodes([node, ...selectedNodes].slice(0, 2));
-  };
-
-  const addConnector = () => {
-    if (selectedNodes.length === 2) {
-      setConnectors([...connectors, selectedNodes]);
-      setSelectedNodes([]);
-    }
-  };
-*/
   return (
     <div className="App">
       <Navbar bg="light" expand="lg">
@@ -113,7 +77,6 @@ function App() {
           nodeTypes={nodeTypes}
           fitView
           style={rfStyle}
-          //nodeTypes={{ editable: Node }} // The node.js type is causing the nodes to appear differntly, without the reactflow ports
         >
           <Controls />
           <MiniMap />
