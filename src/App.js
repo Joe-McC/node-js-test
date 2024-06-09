@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import {useDropzone} from 'react-dropzone';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-//import Node from './Node';
 import TextUpdaterNode from './TextUpdaterNode';
 
 import './text-updater-node.css';
@@ -38,6 +38,38 @@ function App() {
     (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
+  
+  const saveAsFile = () => {
+    const filename = window.prompt('Enter the desired filename', 'nodes.json');
+    if (filename) {
+      const data = JSON.stringify(nodes);
+      const blob = new Blob([data], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+  
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const onDrop = useCallback(acceptedFiles => {
+    acceptedFiles.forEach((file) => {
+      const reader = new FileReader();
+  
+      reader.onabort = () => console.log('file reading was aborted');
+      reader.onerror = () => console.log('file reading has failed');
+      reader.onload = () => {
+        const nodes = JSON.parse(reader.result);
+        setNodes(nodes);
+      }
+      reader.readAsText(file);
+    });
+  }, []);
+  
+  const {getRootProps, getInputProps} = useDropzone({onDrop});
 
   const addNode = () => {
     const newNode = {
@@ -58,8 +90,9 @@ function App() {
           <Nav className="mr-auto">
             <NavDropdown title="File" id="basic-nav-dropdown">
               <NavDropdown.Item href="#action/3.1">New</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">Open</NavDropdown.Item>
+              <NavDropdown.Item {...getRootProps()}><input {...getInputProps()} />Open</NavDropdown.Item>
               <NavDropdown.Item href="#action/3.3">Save</NavDropdown.Item>
+              <NavDropdown.Item onClick={saveAsFile}>Save As</NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="Edit" id="basic-nav-dropdown">
               <NavDropdown.Item onClick={addNode}>Add Node</NavDropdown.Item>
