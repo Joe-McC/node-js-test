@@ -23,8 +23,22 @@ const rfStyle = {
 };
 
 const initialNodes = [
-  { id: '1', type: 'textUpdater', position: { x: 0, y: 0 }, data: { label: '1' } },
-  { id: '2', type: 'textUpdater', position: { x: 0, y: 100 }, data: { label: '2' } },
+  { id: '1', 
+    type: 'textUpdater', 
+    position: { x: 0, y: 0 }, 
+    data: { 
+      label: 'New Node',
+      id: (1).toString().padStart(3, '0')
+    }
+  },
+  { id: '2', 
+    type: 'textUpdater', 
+    position: { x: 0, y: 100 }, 
+    data: { 
+      label: 'New Node',
+      id: (2).toString().padStart(3, '0')
+    }
+  },
 ];
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
@@ -73,10 +87,13 @@ function App() {
 
   const addNode = () => {
     const newNode = {
-      id: (nodes.length + 1).toString(),
+      id: (nodes.length + 1).toString().padStart(3, '0'),
       type: 'textUpdater',
       position: { x: 0, y: 0 },
-      data: { label: 'New Node' },
+      data: { 
+        label: 'New Node',
+        id: (nodes.length + 1).toString().padStart(3, '0')
+      },
     };
     setNodes((nodes) => [...nodes, newNode]);
   };
