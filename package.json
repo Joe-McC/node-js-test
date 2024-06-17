@@ -16,6 +16,7 @@
     "react-draggable": "^4.4.6",
     "react-dropzone": "^14.2.3",
     "react-scripts": "5.0.1",
+    "react-treebeard": "^3.2.4",
     "reactflow": "^11.11.3",
     "web-vitals": "^2.1.4"
   },

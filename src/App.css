@@ -1,10 +1,22 @@
 .App {
-  text-align: center;
+  display: flex;
+  height: 100vh;
 }
 
 .App-logo {
+  position: fixed;
+  top: 0; /* Adjust as needed */
+  left: 0; /* Add this line */
   height: 40vmin;
+  background-color: #282c34;
   pointer-events: none;
+}
+.navbar-fixed-top {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000; /* This ensures the navbar stays on top of other elements */
+  background-color: lightgrey;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -26,6 +38,20 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.treeview {
+  width: 250px; /* Set a fixed width for the Tree view */
+  overflow-y: auto;
+  margin-top: 56px; /* Adjust as needed */
+  border-right: 1px solid #ccc;
+  padding: 10px;
+}
+
+.flow {
+  flex-grow: 1;
+  /*width: calc(100% - 300px);  Adjust this value to match .treeview width 
+  height: 100vh;*/
 }
 
 @keyframes App-logo-spin {
