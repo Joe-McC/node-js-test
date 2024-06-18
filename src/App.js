@@ -5,6 +5,7 @@ import { Treebeard } from 'react-treebeard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TextUpdaterNode from './TextUpdaterNode';
+import { initialTreeData, nodesToTreeData, treeStyle} from './TreeView';
 
 import './text-updater-node.css';
 import './App.css';
@@ -67,20 +68,10 @@ function App() {
     ]
   };
 
-  const nodesToTreeData = (nodes) => {
-    return nodes.map((node) => ({
-      name: node.data.label,
-      id: node.id,
-      toggled: true,
-      children: [],
-    }));
-  };
-
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [treeData, setTreeData] = React.useState(nodesToTreeData(nodes));
-  //const treeData = nodesToTreeData(nodes);
-
+ 
   useEffect(() => {
     setTreeData(nodesToTreeData(nodes));
   }, [nodes]);
@@ -189,86 +180,5 @@ function App() {
     </div>
   );
 }
-
-
-const treeStyle = {
-  tree: {
-    base: {
-      listStyle: "none",
-      backgroundColor: "white",
-      margin: 0,
-      padding: 0,
-      color: "#00ff00",
-      fontFamily: "lucida grande ,tahoma,verdana,arial,sans-serif",
-      fontSize: "14px",
-      height: "100%",
-      width: "100%",
-    },
-    node: {
-      base: {
-        position: "relative",
-      },
-      link: {
-        cursor: "pointer",
-        position: "relative",
-        padding: "0px 5px",
-        display: "block",
-      },
-      activeLink: {
-        background: "#31363F",
-      },
-      toggle: {
-        base: {
-          position: "relative",
-          display: "inline-block",
-          verticalAlign: "top",
-          marginLeft: "-5px",
-          height: "24px",
-          width: "24px",
-        },
-        wrapper: {
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          margin: "-7px 0 0 -7px",
-          height: "14px",
-        },
-        height: 14,
-        width: 14,
-        arrow: {
-          fill: "#9DA5AB",
-          strokeWidth: 0,
-        },
-      },
-      header: {
-        base: {
-          display: "inline-block",
-          verticalAlign: "top",
-          color: "#9DA5AB",
-        },
-        connector: {
-          width: "2px",
-          height: "12px",
-          borderLeft: "solid 2px black",
-          borderBottom: "solid 2px black",
-          position: "absolute",
-          top: "0px",
-          left: "-21px",
-        },
-        title: {
-          lineHeight: "24px",
-          verticalAlign: "middle",
-        },
-      },
-      subtree: {
-        listStyle: "none",
-        paddingLeft: "19px",
-      },
-      loading: {
-        color: "#E2C089",
-      },
-    },
-  },
-};
 
 export default App;
