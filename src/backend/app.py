@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 import json
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # In-memory storage for node data (this can be replaced with a database)
 node_storage = {}
@@ -10,31 +12,40 @@ node_storage = {}
 def save_nodes():
     try:
         data = request.json
-        # Assuming the request body contains `nodes` and `filename`
+        print(f"Received data: {data}")  # Debugging print
+
         filename = data.get("filename", "default_nodes.json")
         nodes = data.get("nodes", [])
-        
-        # Save nodes to in-memory storage or file (if needed)
+
+        # Check if nodes and filename are valid
+        if not filename or not nodes:
+            print("Filename or nodes data missing")  # Debugging print
+            return jsonify({"error": "Filename or nodes data missing."}), 400
+
+        # Save nodes to in-memory storage
         node_storage[filename] = nodes
 
-        # Save nodes to a file if needed
+        # Save nodes to file on disk
         with open(filename, 'w') as f:
             json.dump(nodes, f)
 
+        print(f"Nodes successfully saved to {filename}")  # Debugging print
         return jsonify({"message": "Nodes saved successfully!"}), 200
     except Exception as e:
+        print(f"Error saving nodes: {str(e)}")  # Debugging print
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/load_nodes', methods=['GET'])
 def load_nodes():
     try:
-        # Retrieve the filename from query parameters
         filename = request.args.get("filename", "default_nodes.json")
 
+        # Check if file exists in in-memory storage
         if filename in node_storage:
             nodes = node_storage[filename]
         else:
-            # Load from file if in-memory storage does not have the data
+            # Check if file exists on disk
             with open(filename, 'r') as f:
                 nodes = json.load(f)
 
@@ -45,4 +56,4 @@ def load_nodes():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

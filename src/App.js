@@ -27,8 +27,8 @@ const rfStyle = {
 };
 
 const initialNodes = [
-  { id: '1', type: 'textUpdater', position: { x: 0, y: 0 }, data: { label: 'New Node 001' } },
-  { id: '2', type: 'textUpdater', position: { x: 0, y: 100 }, data: { label: 'New Node 002' } }
+  { id: '1', type: 'textUpdater', position: { x: 0, y: 0 }, data: { label: 'New Node 001', id: '1' } },
+  { id: '2', type: 'textUpdater', position: { x: 0, y: 100 }, data: { label: 'New Node 002', id: '2' } }
 ];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
@@ -54,28 +54,65 @@ function App() {
   const saveToBackend = () => {
     const filename = window.prompt('Enter filename for saving', 'nodes.json');
     if (filename) {
-      axios.post('http://127.0.0.1:5000/save_nodes', { filename, nodes })
-        .then(response => {
-          alert(response.data.message);
-        })
-        .catch(error => {
-          console.error('Error saving nodes:', error);
-        });
+        if (nodes.length === 0) {  // Check if nodes are empty
+            alert('No nodes to save.');
+            return;
+        }
+        
+        axios.post('http://127.0.0.1:5000/save_nodes', { filename, nodes })
+            .then(response => {
+                if (response.data && response.data.message) {
+                    alert(response.data.message); // Success message
+                } else {
+                    alert('Unexpected response from backend');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving nodes:', error); // Log the full error
+                if (error.response && error.response.data && error.response.data.error) {
+                    alert(`Error saving nodes: ${error.response.data.error}`); // Show the specific backend error message
+                } else {
+                    alert('Error saving nodes. Please check the backend.');
+                }
+            });
     }
   };
+  
+  
 
   const loadFromBackend = () => {
     const filename = window.prompt('Enter filename to load', 'nodes.json');
     if (filename) {
-      axios.get(`http://127.0.0.1:5000/load_nodes?filename=${filename}`)
-        .then(response => {
-          setNodes(response.data.nodes);
-        })
-        .catch(error => {
-          console.error('Error loading nodes:', error);
-        });
+        axios.get(`http://127.0.0.1:5000/load_nodes?filename=${filename}`)
+            .then(response => {
+                if (response.data && response.data.nodes) {
+                    // Ensure nodes data is correctly structured for TextUpdaterNode
+                    const loadedNodes = response.data.nodes.map(node => ({
+                        ...node,
+                        data: {
+                            ...node.data,
+                            label: node.data.label || '', // Ensure label is present
+                            id: node.data.id || node.id // Ensure id is preserved
+                        }
+                    }));
+
+                    setNodes(loadedNodes); // Set loaded nodes with updated structure
+                    setEdges(response.data.edges || []); // Optional: Set loaded edges if needed
+                } else {
+                    alert('Invalid response format or file not found');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading nodes:', error); // Console log the error
+                if (error.response && error.response.data && error.response.data.error) {
+                    alert(`Error loading nodes: ${error.response.data.error}`); // Show backend error message
+                } else {
+                    alert('Error loading nodes. Please check the backend and try again.');
+                }
+            });
     }
   };
+
 
   // Add Node function
   const addNode = () => {
@@ -84,7 +121,7 @@ function App() {
       id: newId,
       type: 'textUpdater',
       position: { x: Math.random() * 250, y: Math.random() * 250 }, // Random position
-      data: { label: `New Node ${newId.padStart(3, '0')}` },
+      data: { label: `New Node ${newId.padStart(3, '0')}`, id: newId },  // Include id in data
     };
     setNodes((nds) => [...nds, newNode]);
   };
@@ -101,7 +138,23 @@ function App() {
     setSelectedNode(null); // Clear selection after removal
   };
 
-  // Handle node click for selection
+  const onNodeChange = useCallback((id, newLabel) => {
+    setNodes((nds) => 
+        nds.map(node => {
+            if (node.id === id) {
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        label: newLabel // Update the label in the node data
+                    }
+                };
+            }
+            return node;
+        })
+    );
+  }, [setNodes]);
+
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
   };
@@ -191,7 +244,7 @@ function App() {
               onEdgesChange={onEdgesChange}
               onNodeClick={onNodeClick}
               onConnect={onConnect}
-              nodeTypes={nodeTypes}
+              nodeTypes={{ textUpdater: (nodeProps) => <TextUpdaterNode {...nodeProps} onUpdate={onNodeChange} /> }}
               fitView
               style={rfStyle}
             >
