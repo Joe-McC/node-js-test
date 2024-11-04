@@ -1,26 +1,49 @@
-.text-updater-node {
-  height: 80px; /* Reduced from 50px to 30px */
+/* Container for the custom node component */
+.text-updater-node { 
+  height: 80px;
   border: 1px solid #eee;
   padding: 5px;
   border-radius: 5px;
   background: white;
-  display: flex; 
-  align-items: center; 
-  justify-content: left; 
+  display: flex;
+  align-items: center;
+  justify-content: left;
   flex-direction: column;
+  pointer-events: auto; /* Ensures node container is interactive */
 }
 
+/* Grid layout for label and input pairs within the node */
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto; /* Creates two columns */
-  gap: 10px; /* Adds a gap between grid items */
+  grid-template-columns: auto auto; /* Two-column layout for labels and inputs */
+  gap: 10px; /* Adds spacing between items */
 }
 
+/* Style for labels to position them in the first column */
 .grid-container label {
-  grid-column: 1; /* Places labels in the first column */
+  grid-column: 1;
 }
 
+/* Style for span and input elements to place them in the second column */
 .grid-container span,
 .grid-container input {
-  grid-column: 2; /* Places the span and input in the second column */
+  grid-column: 2;
+}
+
+/* Style for input field within the node */
+.grid-container input {
+  pointer-events: auto; /* Enables interactions within input */
+  user-select: text; /* Allows text selection */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px;
+  width: 100%; /* Full width to fill the cell */
+  box-sizing: border-box; /* Ensures padding is within the element's width */
+}
+
+/* Style for elements with 'nodrag' class to enable pointer events */
+.nodrag {
+  pointer-events: auto;
+  user-select: text;
 }

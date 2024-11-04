@@ -43,90 +43,65 @@ function App() {
 
   // Recalculate tree data whenever nodes or edges change
   useEffect(() => {
-    setTreeData(nodesToTreeData(nodes, edges)); // Update treeData when nodes or edges change
+    setTreeData(nodesToTreeData(nodes, edges));
   }, [nodes, edges]);
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
-
   const saveToBackend = () => {
-    const filename = window.prompt('Enter filename for saving', 'nodes.json');
+    const filename = window.prompt('Enter filename for saving', 'flow_data.json');
     if (filename) {
-        if (nodes.length === 0) {  // Check if nodes are empty
-            alert('No nodes to save.');
-            return;
-        }
-        
-        axios.post('http://127.0.0.1:5000/save_nodes', { filename, nodes })
-            .then(response => {
-                if (response.data && response.data.message) {
-                    alert(response.data.message); // Success message
-                } else {
-                    alert('Unexpected response from backend');
-                }
-            })
-            .catch(error => {
-                console.error('Error saving nodes:', error); // Log the full error
-                if (error.response && error.response.data && error.response.data.error) {
-                    alert(`Error saving nodes: ${error.response.data.error}`); // Show the specific backend error message
-                } else {
-                    alert('Error saving nodes. Please check the backend.');
-                }
-            });
+      if (nodes.length === 0 && edges.length === 0) {
+        alert('No nodes or edges to save.');
+        return;
+      }
+  
+      // Sending both nodes and edges to the backend
+      axios.post('http://127.0.0.1:5000/save_nodes', { filename, nodes, edges })
+        .then(response => {
+          alert(response.data?.message || 'Data saved successfully');
+        })
+        .catch(error => {
+          console.error('Error saving data:', error);
+          alert(`Error saving data: ${error.response?.data?.error || 'Please check the backend.'}`);
+        });
     }
   };
   
-  
-
   const loadFromBackend = () => {
-    const filename = window.prompt('Enter filename to load', 'nodes.json');
+    const filename = window.prompt('Enter filename to load', 'flow_data.json');
     if (filename) {
-        axios.get(`http://127.0.0.1:5000/load_nodes?filename=${filename}`)
-            .then(response => {
-                if (response.data && response.data.nodes) {
-                    // Ensure nodes data is correctly structured for TextUpdaterNode
-                    const loadedNodes = response.data.nodes.map(node => ({
-                        ...node,
-                        data: {
-                            ...node.data,
-                            label: node.data.label || '', // Ensure label is present
-                            id: node.data.id || node.id // Ensure id is preserved
-                        }
-                    }));
-
-                    setNodes(loadedNodes); // Set loaded nodes with updated structure
-                    setEdges(response.data.edges || []); // Optional: Set loaded edges if needed
-                } else {
-                    alert('Invalid response format or file not found');
-                }
-            })
-            .catch(error => {
-                console.error('Error loading nodes:', error); // Console log the error
-                if (error.response && error.response.data && error.response.data.error) {
-                    alert(`Error loading nodes: ${error.response.data.error}`); // Show backend error message
-                } else {
-                    alert('Error loading nodes. Please check the backend and try again.');
-                }
-            });
+      axios.get(`http://127.0.0.1:5000/load_nodes?filename=${filename}`)
+        .then(response => {
+          const { nodes: loadedNodes, edges: loadedEdges } = response.data;
+  
+          const formattedNodes = loadedNodes.map(node => ({
+            ...node,
+            data: { ...node.data, label: node.data.label || '', id: node.data.id || node.id },
+          }));
+  
+          setNodes(formattedNodes);
+          setEdges(loadedEdges || []); // Ensure edges are set, even if empty
+  
+          alert('Data loaded successfully');
+        })
+        .catch(error => {
+          console.error('Error loading data:', error);
+          alert(`Error loading data: ${error.response?.data?.error || 'Please check the backend.'}`);
+        });
     }
   };
+  
 
-
-  // Add Node function
   const addNode = () => {
-    const newId = (nodes.length + 1).toString(); // New node id
+    const newId = (nodes.length + 1).toString();
     const newNode = {
       id: newId,
       type: 'textUpdater',
-      position: { x: Math.random() * 250, y: Math.random() * 250 }, // Random position
-      data: { label: `New Node ${newId.padStart(3, '0')}`, id: newId },  // Include id in data
+      position: { x: Math.random() * 250, y: Math.random() * 250 },
+      data: { label: `New Node ${newId.padStart(3, '0')}`, id: newId },
     };
     setNodes((nds) => [...nds, newNode]);
   };
 
-  // Remove Node function
   const removeNode = () => {
     if (!selectedNode) {
       alert('No node selected to remove!');
@@ -135,78 +110,45 @@ function App() {
 
     setNodes((nds) => nds.filter((node) => node.id !== selectedNode.id));
     setEdges((eds) => eds.filter((edge) => edge.source !== selectedNode.id && edge.target !== selectedNode.id));
-    setSelectedNode(null); // Clear selection after removal
+    setSelectedNode(null);
   };
 
-  const onNodeChange = useCallback((id, newLabel) => {
-    setNodes((nds) => 
-        nds.map(node => {
-            if (node.id === id) {
-                return {
-                    ...node,
-                    data: {
-                        ...node.data,
-                        label: newLabel // Update the label in the node data
-                    }
-                };
-            }
-            return node;
-        })
+  const updateNodeData = useCallback((id, newData) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, ...newData } }
+          : node
+      )
     );
   }, [setNodes]);
-
-  const onNodeClick = (event, node) => {
-    setSelectedNode(node);
-  };
-
-   
+  
   const updateTreeData = (nodeToUpdate, tree) => {
     return tree.map(node => {
       if (node.id === nodeToUpdate.id) {
-        // Update the node that was toggled
-        return {
-          ...node,
-          active: true, // Toggle the active state
-          toggled: nodeToUpdate.toggled, // Keep the toggled state as passed in
-        };
+        return { ...node, active: true, toggled: nodeToUpdate.toggled };
       }
-      
-      // If the node has children, recursively update them
       if (node.children) {
-        return {
-          ...node,
-          children: updateTreeData(nodeToUpdate, node.children), // Update children recursively
-        };
+        return { ...node, children: updateTreeData(nodeToUpdate, node.children) };
       }
-  
       return node;
     });
   };
-  
+
   const handleTreeToggle = (node, toggled) => {
-    // Set all nodes to inactive
-    const resetActiveState = (tree) => {
-      return tree.map(n => ({
-        ...n,
-        active: false, // Reset all nodes to inactive
-        children: n.children ? resetActiveState(n.children) : n.children
-      }));
-    };
-  
-    // First reset the active state for all nodes
+    const resetActiveState = (tree) => tree.map(n => ({
+      ...n,
+      active: false,
+      children: n.children ? resetActiveState(n.children) : n.children
+    }));
+
     const newTree = resetActiveState(treeData);
-  
-    // Update the toggled node and its children
-    const updatedTree = updateTreeData(
-      { ...node, toggled }, // Pass the node with the new toggled state
-      newTree
-    );
-  
-    setTreeData(updatedTree); // Update the state with the new tree
-    setSelectedNode(node); // Set the selected node
+    const updatedTree = updateTreeData({ ...node, toggled }, newTree);
+
+    setTreeData(updatedTree);
+    setSelectedNode(node);
   };
-  
-  
+
   return (
     <div className="App">
       <Navbar bg="light" expand="lg">
@@ -226,7 +168,6 @@ function App() {
         </Navbar.Collapse>
       </Navbar>
       <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-        {/* Tree View */}
         <div style={{ width: '30%', overflow: 'auto', borderRight: '1px solid #ddd', padding: '10px' }}>
           <Treebeard
             data={treeData}
@@ -234,19 +175,22 @@ function App() {
             style={treeStyle}
           />
         </div>
-        {/* React Flow Diagram */}
         <div style={{ flexGrow: 1, height: '100%' }}>
           <ReactFlowProvider>
             <ReactFlow
-              nodes={nodes}
+              nodes={nodes.map(node => ({
+                ...node,
+                key: node.id,
+                type: node.type,
+                data: { ...node.data, updateNodeData },
+              }))}
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
-              onNodeClick={onNodeClick}
-              onConnect={onConnect}
-              nodeTypes={{ textUpdater: (nodeProps) => <TextUpdaterNode {...nodeProps} onUpdate={onNodeChange} /> }}
+              nodeTypes={nodeTypes}
+              onConnect={(params) => setEdges((eds) => addEdge(params, eds))}
               fitView
-              style={rfStyle}
+              style={{ backgroundColor: '#B8CEFF' }}
             >
               <Controls />
               <MiniMap />
