@@ -16,6 +16,7 @@ def save_nodes():
 
         filename = data.get("filename", "default_nodes.json")
         nodes = data.get("nodes", [])
+        edges = data.get("edges", [])
 
         # Check if nodes and filename are valid
         if not filename or not nodes:
@@ -27,7 +28,7 @@ def save_nodes():
 
         # Save nodes to file on disk
         with open(filename, 'w') as f:
-            json.dump(nodes, f)
+            json.dump({"nodes": nodes, "edges": edges}, f)
 
         print(f"Nodes successfully saved to {filename}")  # Debugging print
         return jsonify({"message": "Nodes saved successfully!"}), 200
@@ -43,13 +44,13 @@ def load_nodes():
 
         # Check if file exists in in-memory storage
         if filename in node_storage:
-            nodes = node_storage[filename]
+            data = node_storage[filename]
         else:
             # Check if file exists on disk
             with open(filename, 'r') as f:
-                nodes = json.load(f)
-
-        return jsonify({"nodes": nodes}), 200
+                data = json.load(f)
+        return jsonify(data)
+        #return jsonify({"nodes": nodes}), 200
     except FileNotFoundError:
         return jsonify({"error": f"File '{filename}' not found."}), 404
     except Exception as e:
