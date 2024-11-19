@@ -1,16 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 
 const TextUpdaterNode = React.memo(({ data, isConnectable }) => {
   const [text, setText] = useState(data.text || '');
+  const [description, setDescription] = useState(data.description || '');
 
   useEffect(() => {
     setText(data.text || '');
-  }, [data.text]);
+    setDescription(data.description || '');
+  }, [data.text, data.description]);
 
-  const handleChange = (event) => {
+  const handleTextChange = (event) => {
     setText(event.target.value);
     data.updateNodeData(data.id, { text: event.target.value });
+  };
+
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value);
+    data.updateNodeData(data.id, { description: event.target.value });
   };
 
   return (
@@ -18,13 +25,19 @@ const TextUpdaterNode = React.memo(({ data, isConnectable }) => {
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
         <label>Node ID:</label>
-        <span>{data.id}</span>
-        <label htmlFor="text">Text:</label>
         <input
           id="text"
           name="text"
           value={text}
-          onChange={handleChange}
+          onChange={handleTextChange}
+          className="nodrag"
+        />
+        <label htmlFor="description">Description:</label>
+        <input
+          id="description"
+          name="description"
+          value={description}
+          onChange={handleDescriptionChange}
           className="nodrag"
         />
       </div>

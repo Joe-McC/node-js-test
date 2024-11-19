@@ -27,25 +27,27 @@ const rfStyle = {
 };
 
 const initialNodes = [
-  { id: '1', type: 'textUpdater', position: { x: 0, y: 0 }, data: { label: 'New Node 001', id: '1' } },
-  { id: '2', type: 'textUpdater', position: { x: 0, y: 100 }, data: { label: 'New Node 002', id: '2' } }
+  //{ id: '1', type: 'textUpdater', position: { x: 0, y: 0 }, data: { label: 'New Node 001', id: '1' } },
+  //{ id: '2', type: 'textUpdater', position: { x: 0, y: 100 }, data: { label: 'New Node 002', id: '2' } }
 ];
 
-const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
-
+//const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+const initialEdges = [];
 const nodeTypes = { textUpdater: TextUpdaterNode };
 
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = React.useState(null);
-  const [treeData, setTreeData] = React.useState(nodesToTreeData(initialNodes, initialEdges));
+  const [treeData, setTreeData] = React.useState(
+    nodesToTreeData(initialNodes, initialEdges) || { name: 'No nodes available', toggled: true, children: [] }
+  );
+  
 
   // Recalculate tree data whenever nodes or edges change
   useEffect(() => {
     setTreeData(nodesToTreeData(nodes, edges));
   }, [nodes, edges]);
-
   const saveToBackend = () => {
     const filename = window.prompt('Enter filename for saving', 'flow_data.json');
     if (filename) {
@@ -54,8 +56,15 @@ function App() {
         return;
       }
   
-      // Sending both nodes and edges to the backend
-      axios.post('http://127.0.0.1:5000/save_nodes', { filename, nodes, edges })
+      // Ensure description is part of the data
+      const payload = nodes.map((node) => ({
+        id: node.id,
+        position: node.position,
+        type: node.type,
+        data: { text: node.data.text, description: node.data.description, label: node.data.label },
+      }));
+  
+      axios.post('http://127.0.0.1:5000/save_nodes', { filename, nodes: payload, edges })
         .then(response => {
           alert(response.data?.message || 'Data saved successfully');
         })
@@ -75,12 +84,17 @@ function App() {
   
           const formattedNodes = loadedNodes.map(node => ({
             ...node,
-            data: { ...node.data, label: node.data.label || '', id: node.data.id || node.id },
+            data: {
+              ...node.data,
+              text: node.data.text || '',
+              description: node.data.description || '', // Ensure description is included
+              label: node.data.label || '',
+              id: node.data.id || node.id,
+            },
           }));
   
           setNodes(formattedNodes);
           setEdges(loadedEdges || []); // Ensure edges are set, even if empty
-  
           alert('Data loaded successfully');
         })
         .catch(error => {
@@ -90,18 +104,22 @@ function App() {
     }
   };
   
-
   const addNode = () => {
     const newId = (nodes.length + 1).toString();
     const newNode = {
       id: newId,
       type: 'textUpdater',
       position: { x: Math.random() * 250, y: Math.random() * 250 },
-      data: { label: `New Node ${newId.padStart(3, '0')}`, id: newId },
+      data: {
+        label: `New Node ${newId.padStart(3, '0')}`,
+        id: newId,
+        text: '',         // Initialize text field
+        description: '',  // Initialize description field
+      },
     };
     setNodes((nds) => [...nds, newNode]);
   };
-
+   
   const removeNode = () => {
     if (!selectedNode) {
       alert('No node selected to remove!');
