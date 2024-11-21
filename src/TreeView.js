@@ -18,39 +18,40 @@ export const initialTreeData = {
   ]
 };
 
-// TreeView.js (update nodesToTreeData)
 export const nodesToTreeData = (nodes, edges) => {
+  if (!nodes || nodes.length === 0) {
+    return { name: 'No nodes available', toggled: true, children: [] };
+  }
+
   // Create a map of nodes
   const nodeMap = {};
   nodes.forEach((node) => {
-    nodeMap[node.id] = { ...node, children: [] };
+    nodeMap[node.id] = { 
+      id: node.id,
+      name: node.data.label || `Node ${node.id}`, 
+      toggled: true, 
+      children: [] 
+    };
   });
 
-  // Loop through the edges to build parent-child relationships
+  // Establish parent-child relationships
   edges.forEach((edge) => {
     const sourceNode = nodeMap[edge.source];
     const targetNode = nodeMap[edge.target];
-    
     if (sourceNode && targetNode) {
       sourceNode.children.push(targetNode);
     }
   });
 
-  // Find the root nodes (nodes that are not a target of any edge)
+  // Identify root nodes
   const rootNodes = nodes.filter(
     (node) => !edges.some((edge) => edge.target === node.id)
   );
 
-  // Convert root nodes to the structure required by the tree
-  const treeData = rootNodes.map((node) => ({
-    name: node.data.label,
-    id: node.id,
-    toggled: true,
-    children: node.children || []
-  }));
-
-  return treeData;
+  // Return the root nodes as the tree data
+  return rootNodes.map((node) => nodeMap[node.id]);
 };
+
   
 export const treeStyle = {
   tree: {

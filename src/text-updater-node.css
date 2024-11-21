@@ -1,49 +1,41 @@
-/* Container for the custom node component */
 .text-updater-node { 
-  height: 80px;
+  height: auto; /* Adjust height to fit the content */
   border: 1px solid #eee;
   padding: 5px;
   border-radius: 5px;
   background: white;
   display: flex;
   align-items: center;
-  justify-content: left;
-  flex-direction: column;
+  flex-direction: column; /* Stack content vertically */
   pointer-events: auto; /* Ensures node container is interactive */
+  font-size: 7px; /* Adjust this for the node text */
 }
 
-/* Grid layout for label and input pairs within the node */
-.grid-container {
-  display: grid;
-  grid-template-columns: auto auto; /* Two-column layout for labels and inputs */
-  gap: 10px; /* Adds spacing between items */
+.content-container {
+  display: flex;
+  flex-direction: column; /* Stack the inputs and labels vertically */
+  gap: 10px; /* Add spacing between input groups */
+  width: 100%; /* Full width for better alignment */
 }
 
-/* Style for labels to position them in the first column */
-.grid-container label {
-  grid-column: 1;
+.input-group {
+  display: flex;
+  flex-direction: column; /* Align label and input vertically */
+  align-items: flex-start; /* Align labels and inputs to the left */
+  width: 100%; /* Ensure it takes up the container width */
 }
 
-/* Style for span and input elements to place them in the second column */
-.grid-container span,
-.grid-container input {
-  grid-column: 2;
+.input-group label {
+  margin-bottom: 4px; /* Add spacing between label and input */
 }
 
-/* Style for input field within the node */
-.grid-container input {
+.input-group input {
   pointer-events: auto; /* Enables interactions within input */
   user-select: text; /* Allows text selection */
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 4px;
-  width: 100%; /* Full width to fill the cell */
+  width: 100%; /* Full width */
   box-sizing: border-box; /* Ensures padding is within the element's width */
-}
-
-/* Style for elements with 'nodrag' class to enable pointer events */
-.nodrag {
-  pointer-events: auto;
-  user-select: text;
 }

@@ -23,23 +23,27 @@ const TextUpdaterNode = React.memo(({ data, isConnectable }) => {
   return (
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-      <div>
-        <label>Node ID:</label>
-        <input
-          id="text"
-          name="text"
-          value={text}
-          onChange={handleTextChange}
-          className="nodrag"
-        />
-        <label htmlFor="description">Description:</label>
-        <input
-          id="description"
-          name="description"
-          value={description}
-          onChange={handleDescriptionChange}
-          className="nodrag"
-        />
+      <div className="content-container">
+        <div className="input-group">
+          <label>Node ID:</label>
+          <input
+            id="text"
+            name="text"
+            value={text}
+            onChange={handleTextChange}
+            className="nodrag"
+          />
+        </div>
+        <div className="input-group">
+          <label htmlFor="description">Description:</label>
+          <input
+            id="description"
+            name="description"
+            value={description}
+            onChange={handleDescriptionChange}
+            className="nodrag"
+          />
+        </div>
       </div>
       <Handle type="source" position={Position.Bottom} isConnectable={isConnectable} />
     </div>

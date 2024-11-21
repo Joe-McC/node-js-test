@@ -39,14 +39,19 @@ function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = React.useState(null);
-  const [treeData, setTreeData] = React.useState(
-    nodesToTreeData(initialNodes, initialEdges) || { name: 'No nodes available', toggled: true, children: [] }
-  );
+  const [treeData, setTreeData] = React.useState({
+    name: 'No nodes available',
+    toggled: true,
+    children: []
+  });
+  
   
 
   // Recalculate tree data whenever nodes or edges change
   useEffect(() => {
-    setTreeData(nodesToTreeData(nodes, edges));
+    const newTreeData = nodesToTreeData(nodes, edges);
+    console.log('Tree Data:', newTreeData); // Log tree data for debugging
+    setTreeData(newTreeData || { name: 'No nodes available', toggled: true, children: [] });
   }, [nodes, edges]);
   const saveToBackend = () => {
     const filename = window.prompt('Enter filename for saving', 'flow_data.json');
@@ -154,18 +159,18 @@ function App() {
   };
 
   const handleTreeToggle = (node, toggled) => {
-    const resetActiveState = (tree) => tree.map(n => ({
-      ...n,
-      active: false,
-      children: n.children ? resetActiveState(n.children) : n.children
-    }));
-
-    const newTree = resetActiveState(treeData);
-    const updatedTree = updateTreeData({ ...node, toggled }, newTree);
-
-    setTreeData(updatedTree);
+    const updateToggleState = (tree) => 
+      tree.map((n) => ({
+        ...n,
+        toggled: n.id === node.id ? toggled : n.toggled,
+        children: n.children ? updateToggleState(n.children) : []
+      }));
+  
+    const updatedTree = updateToggleState(treeData.children || []);
+    setTreeData({ ...treeData, children: updatedTree });
     setSelectedNode(node);
   };
+ 
 
   return (
     <div className="App">
@@ -185,15 +190,15 @@ function App() {
           </Nav>
         </Navbar.Collapse>
       </Navbar>
-      <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-        <div style={{ width: '30%', overflow: 'auto', borderRight: '1px solid #ddd', padding: '10px' }}>
+      <div className="main-content">
+        <div className="treeview-container">
           <Treebeard
             data={treeData}
             onToggle={handleTreeToggle}
             style={treeStyle}
           />
         </div>
-        <div style={{ flexGrow: 1, height: '100%' }}>
+        <div className="flow-container">
           <ReactFlowProvider>
             <ReactFlow
               nodes={nodes.map(node => ({
@@ -207,6 +212,7 @@ function App() {
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
               onConnect={(params) => setEdges((eds) => addEdge(params, eds))}
+              onNodeClick={(_, node) => setSelectedNode(node)} // Add node click handler
               fitView
               style={{ backgroundColor: '#B8CEFF' }}
             >

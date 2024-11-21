@@ -1,64 +1,39 @@
 .App {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent overflow issues */
 }
 
-.App-logo {
-  position: fixed;
-  top: 0; /* Adjust as needed */
-  left: 0; /* Add this line */
-  height: 40vmin;
-  background-color: #282c34;
-  pointer-events: none;
-}
 .navbar-fixed-top {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1000; /* This ensures the navbar stays on top of other elements */
+  z-index: 1000;
   background-color: lightgrey;
+  height: 56px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.main-content {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-grow: 1;
+  height: calc(100vh); /* Subtract the navbar height */
+  margin-top: 56px; /* Ensure content is pushed below navbar */
+  overflow: hidden;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-.treeview {
-  width: 250px; /* Set a fixed width for the Tree view */
-  overflow-y: auto;
-  margin-top: 56px; /* Adjust as needed */
-  border-right: 1px solid #ccc;
+.treeview-container {
+  width: 30%; /* Treeview occupies 30% of the screen width */
+  height: 100%;
+  overflow-y: auto; /* Allows scrolling if content overflows */
+  border-right: 1px solid #ddd;
   padding: 10px;
 }
 
-.flow {
-  flex-grow: 1;
-  /*width: calc(100% - 300px);  Adjust this value to match .treeview width 
-  height: 100vh;*/
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.flow-container {
+  flex-grow: 1; /* Remaining space is used by the flow container */
+  height: 100%;
+  overflow: hidden;
+  background-color: #e6f7ff;
 }
