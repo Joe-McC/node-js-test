@@ -1,0 +1,42 @@
+.run-model-node { 
+    height: auto; /* Adjust height to fit the content */
+    border: 1px solid #eee;
+    padding: 5px;
+    border-radius: 5px;
+    background: white;
+    display: flex;
+    align-items: center;
+    flex-direction: column; /* Stack content vertically */
+    pointer-events: auto; /* Ensures node container is interactive */
+    font-size: 7px; /* Adjust this for the node text */
+  }
+  
+  .content-container {
+    display: flex;
+    flex-direction: column; /* Stack the inputs and labels vertically */
+    gap: 10px; /* Add spacing between input groups */
+    width: 100%; /* Full width for better alignment */
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column; /* Align label and input vertically */
+    align-items: flex-start; /* Align labels and inputs to the left */
+    width: 100%; /* Ensure it takes up the container width */
+  }
+  
+  .input-group label {
+    margin-bottom: 4px; /* Add spacing between label and input */
+  }
+  
+  .input-group input {
+    pointer-events: auto; /* Enables interactions within input */
+    user-select: text; /* Allows text selection */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px;
+    width: 100%; /* Full width */
+    box-sizing: border-box; /* Ensures padding is within the element's width */
+  }
+  

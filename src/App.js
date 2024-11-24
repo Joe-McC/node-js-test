@@ -5,9 +5,11 @@ import { Treebeard } from 'react-treebeard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TextUpdaterNode from './TextUpdaterNode';
+import RunModelNode from './RunModelNode';
 import { nodesToTreeData, treeStyle } from './TreeView';
 
 import './text-updater-node.css';
+import './run-model-node.css';
 import './App.css';
 
 import ReactFlow, {
@@ -33,7 +35,10 @@ const initialNodes = [
 
 //const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 const initialEdges = [];
-const nodeTypes = { textUpdater: TextUpdaterNode };
+const nodeTypes = {
+  textUpdater: TextUpdaterNode,
+  runModel: RunModelNode, // Add RunModelNode here
+};
 
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -109,22 +114,23 @@ function App() {
     }
   };
   
-  const addNode = () => {
+  const addNode = (type = 'textUpdater') => {
     const newId = (nodes.length + 1).toString();
     const newNode = {
       id: newId,
-      type: 'textUpdater',
+      type: type, // Use the passed node type
       position: { x: Math.random() * 250, y: Math.random() * 250 },
       data: {
         label: `New Node ${newId.padStart(3, '0')}`,
         id: newId,
-        text: '',         // Initialize text field
-        description: '',  // Initialize description field
+        text: type === 'textUpdater' ? '' : undefined, // Specific to TextUpdaterNode
+        description: type === 'textUpdater' ? '' : undefined, // Specific to TextUpdaterNode
+        modelParams: type === 'runModel' ? {} : undefined, // Example: Specific to RunModelNode
       },
     };
     setNodes((nds) => [...nds, newNode]);
   };
-   
+  
   const removeNode = () => {
     if (!selectedNode) {
       alert('No node selected to remove!');
@@ -184,7 +190,8 @@ function App() {
               <NavDropdown.Item onClick={loadFromBackend}>Load from Backend</NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="Edit" id="edit-nav-dropdown">
-              <NavDropdown.Item onClick={addNode}>Add Node</NavDropdown.Item>
+              <NavDropdown.Item onClick={() => addNode('textUpdater')}>Add Text Node</NavDropdown.Item>
+              <NavDropdown.Item onClick={() => addNode('runModel')}>Add Run Model Node</NavDropdown.Item>
               <NavDropdown.Item onClick={removeNode}>Remove Node</NavDropdown.Item>
             </NavDropdown>
           </Nav>
@@ -201,10 +208,10 @@ function App() {
         <div className="flow-container">
           <ReactFlowProvider>
             <ReactFlow
-              nodes={nodes.map(node => ({
+              nodes={nodes.map((node) => ({
                 ...node,
                 key: node.id,
-                type: node.type,
+                type: node.type, // Dynamically set type
                 data: { ...node.data, updateNodeData },
               }))}
               edges={edges}
@@ -212,7 +219,7 @@ function App() {
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
               onConnect={(params) => setEdges((eds) => addEdge(params, eds))}
-              onNodeClick={(_, node) => setSelectedNode(node)} // Add node click handler
+              onNodeClick={(_, node) => setSelectedNode(node)}
               fitView
               style={{ backgroundColor: '#B8CEFF' }}
             >
