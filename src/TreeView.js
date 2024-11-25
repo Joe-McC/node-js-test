@@ -48,9 +48,14 @@ export const nodesToTreeData = (nodes, edges) => {
     (node) => !edges.some((edge) => edge.target === node.id)
   );
 
-  // Return the root nodes as the tree data
-  return rootNodes.map((node) => nodeMap[node.id]);
+  // Wrap root nodes in a single tree structure
+  return {
+    name: 'Root',
+    toggled: true,
+    children: rootNodes.map((node) => nodeMap[node.id]),
+  };
 };
+
 
   
 export const treeStyle = {

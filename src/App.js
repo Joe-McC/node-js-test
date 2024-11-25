@@ -55,9 +55,10 @@ function App() {
   // Recalculate tree data whenever nodes or edges change
   useEffect(() => {
     const newTreeData = nodesToTreeData(nodes, edges);
-    console.log('Tree Data:', newTreeData); // Log tree data for debugging
+    console.log('Generated Tree Data:', newTreeData); // Check structure
     setTreeData(newTreeData || { name: 'No nodes available', toggled: true, children: [] });
   }, [nodes, edges]);
+
   const saveToBackend = () => {
     const filename = window.prompt('Enter filename for saving', 'flow_data.json');
     if (filename) {
@@ -153,31 +154,38 @@ function App() {
   }, [setNodes]);
   
   const updateTreeData = (nodeToUpdate, tree) => {
-    return tree.map(node => {
-      if (node.id === nodeToUpdate.id) {
-        return { ...node, active: true, toggled: nodeToUpdate.toggled };
-      }
-      if (node.children) {
-        return { ...node, children: updateTreeData(nodeToUpdate, node.children) };
-      }
-      return node;
+    if (!tree) return []; // Handle undefined or null children gracefully
+  
+    return tree.map((node) => {
+      // Reset the `active` state for all nodes
+      const isActive = node.id === nodeToUpdate.id;
+      return {
+        ...node,
+        active: isActive,
+        toggled: isActive ? nodeToUpdate.toggled : node.toggled,
+        children: node.children ? updateTreeData(nodeToUpdate, node.children) : [],
+      };
     });
   };
+  
 
   const handleTreeToggle = (node, toggled) => {
-    const updateToggleState = (tree) => 
-      tree.map((n) => ({
-        ...n,
-        toggled: n.id === node.id ? toggled : n.toggled,
-        children: n.children ? updateToggleState(n.children) : []
-      }));
+    console.log("Tree Data before toggle:", JSON.stringify(treeData, null, 2));
+    console.log("Toggled Node:", node, "Toggled State:", toggled);
   
-    const updatedTree = updateToggleState(treeData.children || []);
-    setTreeData({ ...treeData, children: updatedTree });
-    setSelectedNode(node);
+    // Update the specific node and reset others
+    const updatedTree = {
+      ...treeData,
+      children: updateTreeData({ ...node, toggled }, treeData.children),
+    };
+  
+    console.log("Tree Data after toggle:", JSON.stringify(updatedTree, null, 2));
+    setTreeData(updatedTree);
+    setSelectedNode(node); // Optionally store the selected node for other use
   };
- 
-
+  
+  
+  
   return (
     <div className="App">
       <Navbar bg="light" expand="lg">
@@ -190,8 +198,10 @@ function App() {
               <NavDropdown.Item onClick={loadFromBackend}>Load from Backend</NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="Edit" id="edit-nav-dropdown">
-              <NavDropdown.Item onClick={() => addNode('textUpdater')}>Add Text Node</NavDropdown.Item>
-              <NavDropdown.Item onClick={() => addNode('runModel')}>Add Run Model Node</NavDropdown.Item>
+              <NavDropdown title="Add Node" id="add-node-nav-dropdown" drop="end">
+                <NavDropdown.Item onClick={() => addNode('textUpdater')}>Add Text Node</NavDropdown.Item>
+                <NavDropdown.Item onClick={() => addNode('runModel')}>Add Run Model Node</NavDropdown.Item>
+              </NavDropdown>
               <NavDropdown.Item onClick={removeNode}>Remove Node</NavDropdown.Item>
             </NavDropdown>
           </Nav>
