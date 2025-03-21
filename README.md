@@ -22,18 +22,47 @@ A machine learning workflow visualization and management tool built with React a
    npm start
    ```
 
-### Backend (Flask)
+### Backend Setup
 
-1. Install Python dependencies:
-   ```
-   cd src/backend
-   pip install flask flask-cors pandas numpy scikit-learn matplotlib plotly evidently
-   ```
+You can choose between a standard Python virtual environment (venv) or a Conda environment:
 
-2. Start the Flask server:
+1. Run the setup script and choose your preferred environment:
    ```
-   python app.py
+   setup.bat
    ```
+   This will install all necessary dependencies for either environment type.
+
+2. Start the application:
+   ```
+   start.bat
+   ```
+   The script will automatically detect and use the available environment.
+
+**Note for Conda users:** Make sure [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/products/distribution) is installed before running setup.bat.
+
+## Known Issues and Workarounds
+
+### Conda Environment Import Issues
+
+There's a known issue with conda environments where module imports (such as Flask) may fail even when the packages are correctly installed in the environment. This can happen due to:
+
+1. Environment variable conflicts
+2. Multiple Python installations or conda environments with the same name
+3. PATH resolution problems with conda activation
+
+The current workaround in `start.bat` uses direct paths to the Python executable in the conda environment, bypassing conda activation mechanisms:
+
+```batch
+# Use full path to Python in conda environment
+set PYTHONPATH=
+set PYTHONHOME=
+set PYTHON_PATH=C:\Users\<username>\Miniconda3\envs\ml-app-env\python.exe
+
+# Directly run with that Python interpreter
+"%PYTHON_PATH%" app.py
+```
+
+Future updates should consider more robust environment detection and potentially use a more cross-platform approach.
 
 ## Usage
 
