@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import axios from 'axios';
-import './text-updater-node.css';
+import './styles/run-model-node.css';
 
 const RunModelNode = ({ id, data }) => {
   const [models, setModels] = useState([]);

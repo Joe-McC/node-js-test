@@ -1,0 +1,246 @@
+import React, { useState, useEffect } from 'react';
+import { Handle, Position } from 'reactflow';
+import './styles/node-styles.css';
+
+const ModelEvalNode = ({ data, isConnectable }) => {
+  const [metrics, setMetrics] = useState(data.metrics || [
+    { name: 'Accuracy', value: 0, target: 0.9 },
+    { name: 'Precision', value: 0, target: 0.85 },
+    { name: 'Recall', value: 0, target: 0.8 },
+    { name: 'F1 Score', value: 0, target: 0.85 },
+    { name: 'Latency (ms)', value: 0, target: 100 }
+  ]);
+  const [confusionMatrix, setConfusionMatrix] = useState(data.confusionMatrix || []);
+  const [evalStatus, setEvalStatus] = useState(data.evalStatus || 'Not Started');
+  const [evalLogs, setEvalLogs] = useState(data.evalLogs || []);
+  const [requirementsMet, setRequirementsMet] = useState(data.requirementsMet || false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedMetrics, setSelectedMetrics] = useState(data.selectedMetrics || [
+    'ClassificationQuality', 'DataQuality'
+  ]);
+  const [reportUrl, setReportUrl] = useState(data.reportUrl || '');
+  const [driftDetected, setDriftDetected] = useState(data.driftDetected || false);
+  
+  const allPossibleMetrics = [
+    'ClassificationQuality', 'RegressionQuality', 'DataQuality', 
+    'ProbClassificationQuality', 'DataDrift'
+  ];
+
+  useEffect(() => {
+    // Update node data when state changes
+    data.updateNodeData(data.id, {
+      metrics,
+      confusionMatrix,
+      evalStatus,
+      evalLogs,
+      requirementsMet,
+      selectedMetrics,
+      evaluationResults: metrics,
+      reportUrl,
+      driftDetected
+    });
+  }, [metrics, confusionMatrix, evalStatus, evalLogs, requirementsMet, selectedMetrics, reportUrl, driftDetected]);
+
+  const runEvaluation = async () => {
+    if (!data.input || !data.input.modelType) {
+      alert('No trained model available. Connect this node to a model training node.');
+      return;
+    }
+    
+    setIsLoading(true);
+    setEvalStatus('Running');
+    setEvalLogs([...evalLogs, `[${new Date().toLocaleTimeString()}] Starting evaluation...`]);
+    
+    try {
+      // Call the backend API for model evaluation
+      const response = await fetch('http://localhost:5000/api/evaluate_model', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          modelType: data.input.modelType,
+          dataset: data.input.dataset,
+          metrics: selectedMetrics
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // Update state with evaluation results
+      setMetrics(result.evaluation_results.map(metric => ({
+        ...metric,
+        target: metrics.find(m => m.name === metric.name)?.target || 
+                (metric.name === 'Latency (ms)' ? 100 : 0.8)
+      })));
+      
+      if (result.confusion_matrix) {
+        setConfusionMatrix(result.confusion_matrix);
+      }
+      
+      // Check if requirements are met
+      const allRequirementsMet = result.evaluation_results.every(metric => {
+        if (metric.name === 'Latency (ms)') {
+          return metric.value <= (metrics.find(m => m.name === metric.name)?.target || 100);
+        }
+        return metric.value >= (metrics.find(m => m.name === metric.name)?.target || 0.8);
+      });
+      
+      setRequirementsMet(allRequirementsMet);
+      setEvalStatus(allRequirementsMet ? 'Requirements Met' : 'Requirements Not Met');
+      
+      // Set report URL if available
+      if (result.report_url) {
+        setReportUrl(result.report_url);
+      }
+      
+      // Set drift status
+      setDriftDetected(result.drift_detected || false);
+      
+      // Add logs
+      setEvalLogs(prev => [
+        ...prev,
+        `[${new Date().toLocaleTimeString()}] Evaluation completed`,
+        `[${new Date().toLocaleTimeString()}] Requirements ${allRequirementsMet ? 'satisfied' : 'not satisfied'}`,
+        ...(result.drift_detected ? [`[${new Date().toLocaleTimeString()}] Data drift detected!`] : [])
+      ]);
+      
+    } catch (error) {
+      console.error('Error during model evaluation:', error);
+      setEvalLogs(prev => [
+        ...prev,
+        `[${new Date().toLocaleTimeString()}] Error: ${error.message}`
+      ]);
+      setEvalStatus('Error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleMetricSelection = (metricName) => {
+    setSelectedMetrics(prev => 
+      prev.includes(metricName)
+        ? prev.filter(m => m !== metricName)
+        : [...prev, metricName]
+    );
+  };
+
+  const viewFullReport = () => {
+    if (reportUrl) {
+      window.open(`http://localhost:5000${reportUrl}`, '_blank');
+    }
+  };
+
+  return (
+    <div className="ml-node model-eval-node">
+      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+      <div className="node-content">
+        <h4>{data.label || 'Model Evaluation'}</h4>
+        
+        <div className="eval-controls">
+          <button 
+            onClick={runEvaluation} 
+            disabled={isLoading}
+            className="eval-button">
+            {isLoading ? 'Evaluating...' : 'Evaluate Model'}
+          </button>
+          <div className="status">Status: {evalStatus}</div>
+          {driftDetected && (
+            <div className="drift-warning">⚠️ Data Drift Detected</div>
+          )}
+        </div>
+        
+        {reportUrl && (
+          <div className="report-link">
+            <button onClick={viewFullReport} className="view-report-btn">
+              View Full Evidently Report
+            </button>
+          </div>
+        )}
+        
+        <div className="metrics-container">
+          <h5>Metrics</h5>
+          <table className="metrics-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Target</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {metrics.map((metric, index) => {
+                // Determine if the metric passes its requirement
+                const passes = metric.name === 'Latency (ms)'
+                  ? metric.value <= metric.target
+                  : metric.value >= metric.target;
+                  
+                return (
+                  <tr key={index} className={metric.value ? (passes ? 'passed' : 'failed') : ''}>
+                    <td>{metric.name}</td>
+                    <td>{metric.value ? (typeof metric.value === 'number' ? metric.value.toFixed(3) : metric.value) : '-'}</td>
+                    <td>{metric.target}</td>
+                    <td>{metric.value ? (passes ? '✓' : '✗') : '-'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        
+        {confusionMatrix && confusionMatrix.length > 0 && (
+          <div className="confusion-matrix">
+            <h5>Confusion Matrix</h5>
+            <table className="matrix-table">
+              <tbody>
+                {confusionMatrix.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {row.map((cell, cellIndex) => (
+                      <td key={cellIndex}>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        
+        {evalLogs.length > 0 && (
+          <div className="eval-logs">
+            <h5>Evaluation Logs</h5>
+            <div className="logs-container">
+              {evalLogs.map((log, index) => (
+                <div key={index} className="log-entry">{log}</div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <div className="metric-selector">
+          <h5>Select Evidently Metrics</h5>
+          <div className="metric-checkboxes">
+            {allPossibleMetrics.map(metric => (
+              <label key={metric} className="metric-checkbox">
+                <input
+                  type="checkbox"
+                  checked={selectedMetrics.includes(metric)}
+                  onChange={() => toggleMetricSelection(metric)}
+                  className="nodrag"
+                />
+                {metric}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Handle type="source" position={Position.Bottom} isConnectable={isConnectable} />
+    </div>
+  );
+};
+
+export default ModelEvalNode; 

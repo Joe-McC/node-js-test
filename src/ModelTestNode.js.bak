@@ -1,0 +1,229 @@
+import React, { useState, useEffect } from 'react';
+import { Handle, Position } from 'reactflow';
+import './styles/node-styles.css';
+
+const ModelTestNode = ({ data, isConnectable }) => {
+  const [testStatus, setTestStatus] = useState(data.testStatus || 'Not Started');
+  const [testResults, setTestResults] = useState(data.testResults || []);
+  const [testLogs, setTestLogs] = useState(data.testLogs || []);
+  const [testDataset, setTestDataset] = useState(data.testDataset || '');
+  const [testSet, setTestSet] = useState(data.testSet || [
+    { id: 1, name: 'DataDriftTest', description: 'Test if data drift is present', passed: false },
+    { id: 2, name: 'ModelPerformanceTest', description: 'Test model accuracy metrics against benchmarks', passed: false },
+    { id: 3, name: 'DataQualityTest', description: 'Test if data quality meets requirements', passed: false },
+    { id: 4, name: 'AdversarialTest', description: 'Test model robustness against adversarial inputs', passed: false },
+    { id: 5, name: 'BiasTest', description: 'Test for bias in model predictions', passed: false }
+  ]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [requirementsStatus, setRequirementsStatus] = useState(data.requirementsStatus || { passed: 0, failed: 0, total: 0 });
+  const [selectedTests, setSelectedTests] = useState(data.selectedTests || testSet.map(t => t.id));
+
+  // Available test datasets
+  const availableDatasets = ['MNIST', 'CIFAR-10', 'Boston Housing', 'Wine Quality', 'Iris', 'Custom Dataset'];
+
+  useEffect(() => {
+    // Update node data when state changes
+    data.updateNodeData(data.id, {
+      testStatus,
+      testResults,
+      testLogs,
+      testDataset,
+      testSet,
+      requirementsStatus,
+      selectedTests,
+      allTestsPassed: testSet.every(test => !selectedTests.includes(test.id) || test.passed)
+    });
+  }, [testStatus, testResults, testLogs, testDataset, testSet, requirementsStatus, selectedTests]);
+
+  const runTests = async () => {
+    if (!testDataset) {
+      alert('Please select a test dataset first');
+      return;
+    }
+    
+    if (!data.input || !data.input.modelType) {
+      alert('No trained model available. Connect this node to a model training node.');
+      return;
+    }
+    
+    setIsRunning(true);
+    setTestStatus('Running');
+    setTestLogs([...testLogs, `[${new Date().toLocaleTimeString()}] Starting test suite on ${testDataset} with ${data.input.modelType}`]);
+    
+    try {
+      // Get selected test names
+      const selectedTestNames = testSet
+        .filter(test => selectedTests.includes(test.id))
+        .map(test => test.name);
+      
+      // Call the backend API for model testing
+      const response = await fetch('http://localhost:5000/api/test_model', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          modelType: data.input.modelType,
+          dataset: testDataset,
+          testTypes: selectedTestNames
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // Update test results and status based on API response
+      const updatedTests = testSet.map(test => {
+        const apiTestResult = result.test_results.find(r => r.name === test.name);
+        if (apiTestResult && selectedTests.includes(test.id)) {
+          return {
+            ...test,
+            passed: apiTestResult.passed
+          };
+        }
+        return test;
+      });
+      
+      setTestSet(updatedTests);
+      
+      // Format test results for display
+      const formattedResults = result.test_results.map((testResult, index) => {
+        const testInfo = testSet.find(t => t.name === testResult.name) || {};
+        return {
+          id: testInfo.id || index + 1,
+          name: testResult.name,
+          result: testResult.passed ? 'Passed' : 'Failed',
+          description: testInfo.description || '',
+          details: testResult.details
+        };
+      });
+      
+      setTestResults(formattedResults);
+      
+      // Set summary from API response
+      setRequirementsStatus({
+        passed: result.summary.passed,
+        failed: result.summary.failed,
+        total: result.summary.total
+      });
+      
+      // Set overall status
+      setTestStatus(result.summary.failed === 0 ? 'All Tests Passed' : 'Some Tests Failed');
+      
+      // Add final log
+      setTestLogs(prev => [
+        ...prev,
+        `[${new Date().toLocaleTimeString()}] Test suite completed: ${result.summary.passed}/${result.summary.total} tests passed`
+      ]);
+      
+    } catch (error) {
+      console.error('Error during model testing:', error);
+      setTestLogs(prev => [
+        ...prev,
+        `[${new Date().toLocaleTimeString()}] Error: ${error.message}`
+      ]);
+      setTestStatus('Error');
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const toggleTestSelection = (testId) => {
+    setSelectedTests(prev => 
+      prev.includes(testId)
+        ? prev.filter(id => id !== testId)
+        : [...prev, testId]
+    );
+  };
+
+  return (
+    <div className="ml-node model-test-node">
+      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+      <div className="node-content">
+        <h4>{data.label || 'Model Testing'}</h4>
+        
+        <div className="input-group">
+          <label>Test Dataset:</label>
+          <select 
+            value={testDataset} 
+            onChange={(e) => setTestDataset(e.target.value)}
+            className="nodrag"
+          >
+            <option value="">Select Test Dataset</option>
+            {availableDatasets.map(dataset => (
+              <option key={dataset} value={dataset}>{dataset}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="test-selection">
+          <h5>Test Selection</h5>
+          {testSet.map(test => (
+            <div key={test.id} className="test-item">
+              <label className="test-checkbox">
+                <input 
+                  type="checkbox"
+                  checked={selectedTests.includes(test.id)}
+                  onChange={() => toggleTestSelection(test.id)}
+                  className="nodrag"
+                />
+                {test.name}
+              </label>
+              <div className="test-description">{test.description}</div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="test-controls">
+          <button 
+            onClick={runTests} 
+            disabled={isRunning || !testDataset || selectedTests.length === 0}
+            className="test-button">
+            {isRunning ? 'Running Tests...' : 'Run Tests'}
+          </button>
+          <div className="status">Status: {testStatus}</div>
+        </div>
+        
+        {testResults.length > 0 && (
+          <div className="test-results">
+            <h5>Test Results</h5>
+            <div className="requirements-summary">
+              <div className="summary-item passed">Passed: {requirementsStatus.passed}</div>
+              <div className="summary-item failed">Failed: {requirementsStatus.failed}</div>
+              <div className="summary-item total">Total: {requirementsStatus.total}</div>
+            </div>
+            
+            <div className="results-list">
+              {testResults.map(result => (
+                <div key={result.id} className={`result-item ${result.result.toLowerCase()}`}>
+                  <div className="result-header">
+                    <span className="result-name">{result.name}</span>
+                    <span className="result-status">{result.result}</span>
+                  </div>
+                  <div className="result-details">{result.details}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {testLogs.length > 0 && (
+          <div className="test-logs">
+            <h5>Test Logs</h5>
+            <div className="logs-container">
+              {testLogs.map((log, index) => (
+                <div key={index} className="log-entry">{log}</div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <Handle type="source" position={Position.Bottom} isConnectable={isConnectable} />
+    </div>
+  );
+};
+
+export default ModelTestNode; 

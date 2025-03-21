@@ -1,70 +1,58 @@
-# Getting Started with Create React App
+# ML Workflow Tool
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A machine learning workflow visualization and management tool built with React and Flask.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Model Evaluation**: Compare reference and current data distributions, detect data drift, and analyze target drift using Evidently AI.
+- **Model Testing**: Analyze data characteristics, feature distributions, and correlations with target variables.
+- **Parameter Tuning**: Optimize model hyperparameters with grid search and visualize results.
 
-### `npm start`
+## Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend (React)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Install dependencies:
+   ```
+   npm install
+   ```
 
-### `npm test`
+2. Start the development server:
+   ```
+   npm start
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Backend (Flask)
 
-### `npm run build`
+1. Install Python dependencies:
+   ```
+   cd src/backend
+   pip install flask flask-cors pandas numpy scikit-learn matplotlib plotly evidently
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. Start the Flask server:
+   ```
+   python app.py
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Usage
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The application provides a visual interface for common machine learning workflows:
 
-### `npm run eject`
+1. **Model Evaluation**: Upload reference and current datasets to analyze data quality and drift metrics with Evidently AI.
+2. **Model Testing**: Evaluate model performance on test data with various metrics and visualizations.
+3. **Parameter Tuning**: Find optimal hyperparameters for your models with grid search.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Backend API
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The Flask backend provides the following API endpoints:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- `/api/model-eval`: Evaluates data quality and drift between reference and current datasets using Evidently
+- `/api/model-test`: Analyzes test data characteristics and feature importance with Evidently reporting
+- `/api/parameter-tuning`: Performs hyperparameter optimization with grid search
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Technologies Used
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Frontend**: React, React Flow, CSS
+- **Backend**: Flask, Pandas, NumPy, scikit-learn, Matplotlib, Plotly
+- **ML Monitoring**: Evidently AI (version 0.14.4)

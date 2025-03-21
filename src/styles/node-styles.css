@@ -1,0 +1,686 @@
+/* Common styles for all ML workflow nodes */
+.ml-node {
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 380px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.ml-node:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.ml-node .node-content {
+  padding: 16px;
+  width: 100%;
+  overflow-y: auto;
+  max-height: calc(80vh - 50px); /* 50px is the header height */
+  scrollbar-width: thin;
+}
+
+.ml-node .node-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ml-node .node-content::-webkit-scrollbar-track {
+  background: #f8f9fa;
+}
+
+.ml-node .node-content::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.ml-node h4 {
+  margin: 0 0 16px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 16px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.ml-node h5 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  color: #444;
+  font-weight: 600;
+}
+
+.ml-node label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  color: #555;
+}
+
+.ml-node .input-group {
+  margin-bottom: 16px;
+}
+
+.ml-node input, 
+.ml-node select, 
+.ml-node textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: #f8f9fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ml-node input:focus, 
+.ml-node select:focus, 
+.ml-node textarea:focus {
+  border-color: #4285f4;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.ml-node button {
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.ml-node button:hover:not(:disabled) {
+  background: #3367d6;
+}
+
+.ml-node button:disabled {
+  background: #d1d1d1;
+  cursor: not-allowed;
+}
+
+.ml-node .small-button {
+  padding: 3px 6px;
+  font-size: 11px;
+  background: #eaeaea;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: inline-block;
+  text-align: center;
+}
+
+.ml-node .small-button:hover {
+  background: #fd79a8;
+  color: white;
+}
+
+.ml-node .status {
+  margin-top: 5px;
+  font-style: italic;
+  font-size: 12px;
+  color: #555;
+}
+
+.ml-node .logs-container {
+  max-height: 100px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  padding: 5px;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.ml-node .log-entry {
+  margin: 2px 0;
+  font-size: 9px;
+  color: #666;
+  word-break: break-all;
+}
+
+.ml-node .progress-bar {
+  width: 100%;
+  height: 15px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  margin: 5px 0;
+  position: relative;
+}
+
+.ml-node .progress-fill {
+  height: 100%;
+  background: #4285f4;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.ml-node .progress-bar span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 10px;
+  line-height: 15px;
+  color: white;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Node Headers with Pastel Colors */
+.node-header {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 4px 4px 0 0;
+}
+
+.node-header.data-source {
+  background-color: #FFD6D6; /* Pastel Red */
+  color: #333;
+}
+
+.node-header.data-processor {
+  background-color: #D6F0FF; /* Pastel Blue */
+  color: #333;
+}
+
+.node-header.model-train {
+  background-color: #D6FFD6; /* Pastel Green */
+  color: #333;
+}
+
+.node-header.model-eval {
+  background-color: #FFF7D6; /* Pastel Yellow */
+  color: #333;
+}
+
+.node-header.model-test {
+  background-color: #F2D6FF; /* Pastel Purple */
+  color: #333;
+}
+
+.node-header.parameter-tuning {
+  background-color: #FFE4D6; /* Pastel Orange */
+  color: #333;
+}
+
+.node-header.requirements {
+  background-color: #D6FFE9; /* Pastel Mint */
+  color: #333;
+}
+
+/* Requirements Node Specific Styles */
+.requirements-node .requirements-container,
+.requirements-node .results-container {
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background-color: #f8f9fa;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.requirements-node table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.requirements-node th,
+.requirements-node td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #eaeaea;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.requirements-node th {
+  background: #f8f9fa;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.requirements-node td {
+  font-size: 12px;
+}
+
+.requirements-node th:first-child,
+.requirements-node td:first-child {
+  width: 35%;
+}
+
+.requirements-node th:nth-child(2),
+.requirements-node td:nth-child(2) {
+  width: 25%;
+}
+
+.requirements-node th:nth-child(3),
+.requirements-node td:nth-child(3) {
+  width: 20%;
+}
+
+.requirements-node th:last-child,
+.requirements-node td:last-child {
+  width: 20%;
+}
+
+.requirements-node .requirement-met {
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.requirements-node .requirement-not-met {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.requirements-node .add-requirement {
+  margin-top: 16px;
+  border-top: 1px solid #eaeaea;
+  padding-top: 16px;
+}
+
+.requirements-node .input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Test selection styling */
+.test-selection {
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background-color: #f8f9fa;
+}
+
+.test-item {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.test-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.test-checkbox {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.test-checkbox input {
+  width: auto;
+  margin-right: 8px;
+}
+
+.test-description {
+  font-size: 12px;
+  color: #666;
+  margin-left: 24px;
+}
+
+/* Visualization container */
+.visualization-container {
+  margin-top: 16px;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: #f8f9fa;
+}
+
+/* Status label styling */
+.status {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: #f1f1f1;
+}
+
+/* Data Prep Node Specific Styles */
+.data-prep-node .slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.data-prep-node .slider-container input {
+  flex: 1;
+}
+
+.data-prep-node .slider-container span {
+  width: 60px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.data-prep-node .preprocessing-steps ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.data-prep-node .preprocessing-steps li {
+  margin: 2px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.data-prep-node .dataset-stats {
+  background: #f9f9f9;
+  padding: 5px;
+  border-radius: 3px;
+  margin-top: 10px;
+}
+
+.data-prep-node .dataset-stats p {
+  margin: 2px 0;
+  font-size: 12px;
+}
+
+/* Model Training Node Specific Styles */
+.model-training-node .training-params {
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.model-training-node .param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.model-training-node .param-row label {
+  flex: 1;
+}
+
+.model-training-node .param-row input,
+.model-training-node .param-row select {
+  flex: 2;
+  margin-left: 10px;
+}
+
+.model-training-node .train-button {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.model-training-node .dataset-info,
+.model-training-node .no-dataset {
+  background: #f9f9f9;
+  padding: 5px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+/* Model Evaluation Node Specific Styles */
+.model-eval-node .metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.model-eval-node .metrics-table th,
+.model-eval-node .metrics-table td {
+  padding: 3px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.model-eval-node .metrics-table th {
+  background: #f9f9f9;
+}
+
+.model-eval-node .passed {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.model-eval-node .failed {
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.model-eval-node .matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.model-eval-node .matrix-table td {
+  padding: 3px;
+  text-align: center;
+  border: 1px solid #eee;
+}
+
+.model-eval-node .metric-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.model-eval-node .metric-checkbox {
+  flex: 1 0 45%;
+  font-size: 11px;
+}
+
+.model-eval-node .drift-warning {
+  color: #F44336;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.model-eval-node .view-report-btn {
+  margin-top: 5px;
+  width: 100%;
+  background-color: #9C27B0;
+}
+
+.model-eval-node .view-report-btn:hover {
+  background-color: #7B1FA2;
+}
+
+/* Model Test Node Specific Styles */
+.model-test-node .test-results {
+  margin-top: 5px;
+}
+
+.model-test-node .requirements-summary {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.model-test-node .summary-item {
+  flex: 1;
+  padding: 5px;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.model-test-node .summary-item.passed {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.model-test-node .summary-item.failed {
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.model-test-node .results-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.model-test-node .result-item {
+  margin-bottom: 5px;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.model-test-node .result-item.passed {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.model-test-node .result-item.failed {
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.model-test-node .result-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+.model-test-node .result-details {
+  font-size: 11px;
+  margin-top: 3px;
+  padding-left: 5px;
+}
+
+/* Parameter Tuning Node Specific Styles */
+.parameter-tuning-node .parameter-item {
+  margin-bottom: 10px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 5px;
+}
+
+.parameter-tuning-node .param-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.parameter-tuning-node .param-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.parameter-tuning-node .param-row label {
+  width: 40px;
+  font-size: 11px;
+}
+
+.parameter-tuning-node .params-table {
+  margin-top: 5px;
+}
+
+.parameter-tuning-node .params-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.parameter-tuning-node .params-table th,
+.parameter-tuning-node .params-table td {
+  padding: 3px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.parameter-tuning-node .params-table th {
+  background: #f9f9f9;
+}
+
+/* Dataset Source Toggle */
+.dataset-source-toggle {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.dataset-source-toggle label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dataset-source-toggle input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+/* Dataset Select Dropdown */
+.dataset-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.dataset-select option {
+  padding: 5px;
+}
+
+/* Data Prep Node Specific Styles */
+.data-prep-node .preprocessing-steps {
+  margin-top: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.data-prep-node .preprocessing-steps ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+}
+
+.data-prep-node .preprocessing-steps li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.data-prep-node .dataset-stats {
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.data-prep-node .dataset-stats h5 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.data-prep-node .dataset-stats p {
+  margin: 4px 0;
+} 

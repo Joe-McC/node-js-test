@@ -1,0 +1,183 @@
+.react-flow__node {
+  padding: 0;
+  border-radius: 5px;
+  width: 250px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #1a192b;
+  overflow: hidden;
+  background: white;
+  font-family: 'Arial', sans-serif;
+}
+
+.node-header {
+  padding: 8px 10px;
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.node-header.data-source {
+  background-color: #2196F3;
+}
+
+.node-header.data-processor {
+  background-color: #4CAF50;
+}
+
+.node-header.model-train {
+  background-color: #FF9800;
+}
+
+.node-header.model-eval {
+  background-color: #9C27B0;
+}
+
+.node-header.model-test {
+  background-color: #F44336;
+}
+
+.node-header.parameter-tuning {
+  background-color: #3F51B5;
+}
+
+.node-content {
+  padding: 10px;
+}
+
+.node-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #555;
+}
+
+.node-content select,
+.node-content input {
+  width: calc(100% - 10px);
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.node-content button {
+  background-color: #1a192b;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.node-content button:hover {
+  background-color: #2d2b42;
+}
+
+.node-handle {
+  width: 10px;
+  height: 10px;
+  background-color: #1a192b;
+  border-radius: 50%;
+}
+
+.visualization-container {
+  margin-top: 10px;
+  background-color: #f9f9f9;
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #eee;
+}
+
+.metric-display {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.error-message {
+  color: #F44336;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Custom node styles for our ML workflow */
+.ml-node {
+  background: white;
+  border-radius: 5px;
+  width: 250px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #1a192b;
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+  margin-bottom: 20px;
+}
+
+.ml-node .node-content {
+  padding: 10px;
+}
+
+.ml-node-button {
+  background-color: #1a192b;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 5px;
+  width: 100%;
+}
+
+.ml-node-button:hover:not(:disabled) {
+  background-color: #2d2b42;
+}
+
+.ml-node-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.ml-node label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #555;
+}
+
+.ml-node select,
+.ml-node input {
+  width: calc(100% - 10px);
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.ml-node h5 {
+  margin: 10px 0 5px;
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+.model-eval-node .visualization-container,
+.model-test-node .visualization-container,
+.parameter-tuning-node .visualization-container {
+  margin-top: 10px;
+  background-color: #f9f9f9;
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #eee;
+} 
