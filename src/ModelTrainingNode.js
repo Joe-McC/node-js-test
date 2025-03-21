@@ -50,23 +50,52 @@ function ModelTrainingNode({ data, isConnectable }) {
   // Update dataset info if it's passed in from another node
   useEffect(() => {
     // Only update if there's actual new data and it's different
-    if (data.datasetInfo && data.datasetInfo.name) {
-      // Use the timestamp to detect changes, or compare name if no timestamp
-      const dataChanged = data.datasetInfo.timestamp !== datasetInfo?.timestamp || 
-                          data.datasetInfo.name !== datasetInfo?.name;
-      
-      if (dataChanged) {
-        console.log('ModelTrainingNode: Received new datasetInfo:', data.datasetInfo);
-        setDatasetInfo(data.datasetInfo);
-      }
-    }
-    // Direct dataset name property
-    else if (data.dataset && data.dataset !== datasetInfo?.name) {
-      console.log('ModelTrainingNode: Received direct dataset name:', data.dataset);
+    console.log('ModelTrainingNode: Checking for dataset updates');
+    console.log('ModelTrainingNode: Current datasetInfo:', datasetInfo);
+    console.log('ModelTrainingNode: Incoming datasetInfo:', data.datasetInfo);
+    console.log('ModelTrainingNode: Incoming dataset name:', data.dataset);
+    
+    // Handle case where dataset and datasetInfo conflict - prioritize direct dataset name
+    if (data.dataset && data.datasetInfo && data.dataset !== data.datasetInfo.name) {
+      console.log('ModelTrainingNode: Dataset name conflicts with datasetInfo - using dataset name:', data.dataset);
       setDatasetInfo({
         name: data.dataset,
-        timestamp: new Date().getTime()
+        splitRatio: data.datasetInfo?.splitRatio || 0.8,
+        stats: data.datasetInfo?.stats || {},
+        timestamp: new Date().getTime(),
+        source: 'direct'
       });
+      return;
+    }
+    
+    // Direct dataset name property - highest priority
+    if (data.dataset && (!datasetInfo || data.dataset !== datasetInfo.name)) {
+      console.log('ModelTrainingNode: Setting dataset from direct name:', data.dataset);
+      setDatasetInfo({
+        name: data.dataset,
+        splitRatio: datasetInfo?.splitRatio || 0.8,
+        stats: datasetInfo?.stats || {},
+        timestamp: new Date().getTime(),
+        source: 'direct'
+      });
+      return;
+    }
+    
+    // datasetInfo object - second priority
+    if (data.datasetInfo && data.datasetInfo.name) {
+      // Use the timestamp to detect changes, or compare name if no timestamp
+      const dataChanged = !datasetInfo || 
+                          data.datasetInfo.timestamp !== datasetInfo.timestamp || 
+                          data.datasetInfo.name !== datasetInfo.name ||
+                          data.datasetInfo.uuid !== datasetInfo.uuid;
+      
+      if (dataChanged) {
+        console.log('ModelTrainingNode: Setting dataset from datasetInfo:', data.datasetInfo);
+        setDatasetInfo({
+          ...data.datasetInfo,
+          source: 'info'
+        });
+      }
     }
   }, [data.datasetInfo, data.dataset]);
 
@@ -114,9 +143,27 @@ function ModelTrainingNode({ data, isConnectable }) {
   };
 
   const trainModel = async () => {
-    if (!datasetInfo || !datasetInfo.name) {
+    // Force a dataset check before proceeding
+    const finalDatasetName = data.dataset || 
+                            (data.datasetInfo && data.datasetInfo.name) || 
+                            (datasetInfo && datasetInfo.name);
+    
+    if (!finalDatasetName) {
       setError('No dataset information available. Connect to a Data Preparation node first.');
       return;
+    }
+
+    // If current state doesn't match incoming props, update it first
+    if (data.dataset && (!datasetInfo || data.dataset !== datasetInfo.name)) {
+      console.log('ModelTrainingNode: Updating dataset before training to:', data.dataset);
+      setDatasetInfo({
+        name: data.dataset,
+        timestamp: new Date().getTime(),
+        source: 'immediate_update'
+      });
+      
+      // Short delay to let state update
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     setLoading(true);
@@ -128,17 +175,17 @@ function ModelTrainingNode({ data, isConnectable }) {
     setTrainingLogs([]);
     setMetrics(null);
     
-    // Get dataset name directly from datasetInfo
-    const datasetName = datasetInfo.name;
+    // Log dataset information for debugging
+    console.log(`ModelTrainingNode: Training with dataset:`, finalDatasetName);
     
     // Add initial message
     setTrainingLogs([
       `[${new Date().toLocaleTimeString()}] Starting model training...`,
-      `[${new Date().toLocaleTimeString()}] Using dataset: ${datasetName}`
+      `[${new Date().toLocaleTimeString()}] Using dataset: ${finalDatasetName}`
     ]);
     
     console.log(`ModelTrainingNode: Starting to train model with dataset:`, {
-      datasetName,
+      datasetName: finalDatasetName,
       modelType,
       params: modelParams[modelType]
     });
@@ -156,7 +203,7 @@ function ModelTrainingNode({ data, isConnectable }) {
       
       // Prepare request data
       const requestData = {
-        datasetName: datasetName,
+        datasetName: finalDatasetName,
         modelType,
         framework,
         params: selectedParams

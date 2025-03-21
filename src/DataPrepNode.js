@@ -108,61 +108,45 @@ function DataPrepNode({ data, isConnectable }) {
       console.log(`DataPrepNode: Dataset configured successfully, name: ${datasetName}`);
       console.log(`DataPrepNode: Dataset stats:`, result.datasetStats);
       
-      // ------- DIRECTLY UPDATE CONNECTED NODES -------
-      // Create a dataset info object with timestamp to ensure change detection
-      const datasetInfo = {
-        name: datasetName,
-        splitRatio: splitRatio,
-        stats: result.datasetStats,
-        nodeId: data.id,
-        timestamp: new Date().getTime() // Add timestamp to force recognition as new object
+      // Force all data to be updated together
+      const updateAll = () => {
+        // Create a dataset info object with timestamp to ensure change detection
+        const datasetInfo = {
+          name: datasetName,
+          splitRatio: splitRatio,
+          stats: result.datasetStats,
+          nodeId: data.id,
+          // Add timestamp and UUID to force recognition as new object
+          timestamp: new Date().getTime(),
+          uuid: Math.random().toString(36).substring(2, 15)
+        };
+        
+        console.log('DataPrepNode: Created dataset info object:', JSON.stringify(datasetInfo));
+        
+        // Use the App.js callback mechanism
+        if (data.onDatasetConfigured) {
+          console.log('DataPrepNode: Sending dataset info via callback with name:', datasetName);
+          data.onDatasetConfigured(datasetInfo);
+        } else {
+          console.warn('DataPrepNode: No onDatasetConfigured callback available');
+        }
+        
+        // Also update via onChange callback for redundancy
+        if (data.onChange) {
+          console.log('DataPrepNode: Updating node data with dataset info');
+          data.onChange({
+            ...data,
+            datasetInfo,
+            dataset: datasetName,
+            datasetName: datasetName,
+            datasetConfigured: true,
+            isConfigured: true
+          });
+        }
       };
       
-      console.log('DataPrepNode: Created dataset info object:', datasetInfo);
-      
-      // Option 1: Use the App.js callback mechanism
-      if (data.onDatasetConfigured) {
-        console.log('DataPrepNode: Sending dataset info via callback');
-        data.onDatasetConfigured(datasetInfo);
-      } else {
-        console.warn('DataPrepNode: No onDatasetConfigured callback available');
-      }
-      
-      // Option 2: Direct ReactFlow access to update connected nodes (fallback)
-      try {
-        if (window.parentReactFlow) {
-          const edges = window.parentReactFlow.getEdges() || [];
-          const nodes = window.parentReactFlow.getNodes() || [];
-          
-          // Find edges where this node is the source
-          const connectedEdges = edges.filter(edge => edge.source === data.id);
-          console.log('DataPrepNode: Connected edges:', connectedEdges);
-          
-          // Update all connected nodes
-          if (connectedEdges.length > 0) {
-            connectedEdges.forEach(edge => {
-              const targetNode = nodes.find(node => node.id === edge.target);
-              if (targetNode && targetNode.data && targetNode.data.onChange) {
-                console.log(`DataPrepNode: Directly updating node ${targetNode.id} (${targetNode.type}) with dataset ${datasetName}`);
-                
-                // Update the node with the new dataset info
-                // This makes a copy of the current node data and adds/updates our fields
-                targetNode.data.onChange({
-                  ...targetNode.data,
-                  // Different node types might expect different property names
-                  datasetInfo: {...datasetInfo},
-                  dataset: datasetName,
-                  datasetName: datasetName
-                });
-              }
-            });
-          } else {
-            console.log('DataPrepNode: No connected edges found');
-          }
-        }
-      } catch (err) {
-        console.error('Error while directly updating connected nodes:', err);
-      }
+      // Call with slight delay to ensure state is fully updated
+      setTimeout(updateAll, 100);
       
     } catch (err) {
       setError(err.message);

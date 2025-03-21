@@ -89,15 +89,20 @@ function App() {
     // Create a deep copy to ensure state updates are recognized
     const datasetInfoCopy = JSON.parse(JSON.stringify(datasetInfo));
     
+    // Add a new timestamp to force recognition as a new update
+    datasetInfoCopy.timestamp = new Date().getTime();
+    
     // Update global dataset state
     setCurrentDataset(datasetInfoCopy);
+    console.log('App: Updated currentDataset state with:', datasetInfoCopy.name);
     
     // Find and update all nodes that need this dataset info
     setNodes((nds) => {
       // Create a new array to trigger React state update
       return nds.map((node) => {
         if (node.type === 'modelTraining' || 
-            node.type === 'modelEvaluation' || 
+            node.type === 'modelEval' || 
+            node.type === 'modelTest' || 
             node.type === 'parameterTuning') {
           
           console.log(`App: Updating ${node.type} node (${node.id}) with dataset: ${datasetInfoCopy.name}`);
@@ -290,35 +295,46 @@ function App() {
   
   const addNode = (type = 'textUpdater') => {
     const newId = getId();
+    const newNodeData = {
+      label: `${getNodeLabel(type)} ${newId}`,
+      id: newId,
+      // Add callback for dataset configuration
+      onDatasetConfigured: handleDatasetConfigured,
+      // Add updateNodeData function for all nodes
+      onChange: (updatedData) => {
+        setNodes((nds) =>
+          nds.map((node) => {
+            if (node.id === newId) {
+              return {
+                ...node,
+                data: {
+                  ...updatedData,
+                  onDatasetConfigured: handleDatasetConfigured, // Preserve the callback
+                  onChange: node.data.onChange, // Preserve the onChange function
+                },
+              };
+            }
+            return node;
+          })
+        );
+      },
+    };
+    
+    // If adding a node that should inherit the current dataset
+    if (['modelTraining', 'modelEval', 'modelTest', 'parameterTuning'].includes(type) && currentDataset) {
+      console.log(`App: Adding new ${type} node with current dataset:`, currentDataset.name);
+      newNodeData.datasetInfo = {...currentDataset};
+      newNodeData.dataset = currentDataset.name;
+      newNodeData.datasetName = currentDataset.name;
+    }
+    
     const newNode = {
       id: newId,
       type: type,
       position: { x: Math.random() * 250, y: Math.random() * 250 },
-      data: {
-        label: `${getNodeLabel(type)} ${newId}`,
-        id: newId,
-        // Add callback for dataset configuration
-        onDatasetConfigured: handleDatasetConfigured,
-        // Add updateNodeData function for all nodes
-        onChange: (updatedData) => {
-          setNodes((nds) =>
-            nds.map((node) => {
-              if (node.id === newId) {
-                return {
-                  ...node,
-                  data: {
-                    ...updatedData,
-                    onDatasetConfigured: handleDatasetConfigured, // Preserve the callback
-                    onChange: node.data.onChange, // Preserve the onChange function
-                  },
-                };
-              }
-              return node;
-            })
-          );
-        },
-      },
+      data: newNodeData,
     };
+    
     setNodes((nds) => [...nds, newNode]);
   };
   
